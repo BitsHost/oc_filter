@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Product Filter Extension</name>
+    <code>oc_filter</code>
+    <version>1.0.0</version>
+    <author>OpenCart Filter</author>
+    <link>https://github.com/</link>
+    
+    <!-- Add filter to category page -->
+    <file path="catalog/controller/product/category.php">
+        <operation>
+            <search><![CDATA[$data['products'] = array();]]></search>
+            <add position="before"><![CDATA[
+            // Apply filters
+            $filter_data = array();
+            
+            if (isset($this->request->get['price_min'])) {
+                $filter_data['filter_price_min'] = $this->request->get['price_min'];
+            }
+            
+            if (isset($this->request->get['price_max'])) {
+                $filter_data['filter_price_max'] = $this->request->get['price_max'];
+            }
+            
+            if (isset($this->request->get['brands'])) {
+                $filter_data['filter_manufacturer_id'] = explode(',', $this->request->get['brands']);
+            }
+            
+            if (isset($this->request->get['metakeywords'])) {
+                $filter_data['filter_metakeywords'] = explode(',', $this->request->get['metakeywords']);
+            }
+            ]]></add>
+        </operation>
+        
+        <operation>
+            <search><![CDATA['start'            => ($page - 1) * $limit,
+				'limit'           => $limit]]></search>
+            <add position="after"><![CDATA[,
+                'filter_price_min' => isset($filter_data['filter_price_min']) ? $filter_data['filter_price_min'] : null,
+                'filter_price_max' => isset($filter_data['filter_price_max']) ? $filter_data['filter_price_max'] : null,
+                'filter_manufacturer_id' => isset($filter_data['filter_manufacturer_id']) ? $filter_data['filter_manufacturer_id'] : null,
+                'filter_metakeywords' => isset($filter_data['filter_metakeywords']) ? $filter_data['filter_metakeywords'] : null]]></add>
+        </operation>
+    </file>
+    
+    <!-- Modify product model to handle filters -->
+    <file path="catalog/model/catalog/product.php">
+        <operation>
+            <search><![CDATA[if (!empty($data['filter_category_id'])) {
+			if (!empty($data['filter_sub_category'])) {
+				$sql .= " AND cp.category_id IN (SELECT category_id FROM " . DB_PREFIX . "category_path WHERE path_id = '" . (int)$data['filter_category_id'] . "')";
+			} else {
+				$sql .= " AND cp.category_id = '" . (int)$data['filter_category_id'] . "'";
+			}
+		}]]></search>
+            <add position="after"><![CDATA[
+        
+        if (!empty($data['filter_price_min'])) {
+            $sql .= " AND p.price >= '" . (float)$data['filter_price_min'] . "'";
+        }
+        
+        if (!empty($data['filter_price_max'])) {
+            $sql .= " AND p.price <= '" . (float)$data['filter_price_max'] . "'";
+        }
+        
+        if (!empty($data['filter_manufacturer_id'])) {
+            $sql .= " AND p.manufacturer_id IN (" . implode(',', array_map('intval', $data['filter_manufacturer_id'])) . ")";
+        }
+        
+        if (!empty($data['filter_metakeywords'])) {
+            $keywords = array_map(array($this->db, 'escape'), $data['filter_metakeywords']);
+            $sql .= " AND pd.meta_keyword REGEXP '" . implode('|', $keywords) . "'";
+        }]]></add>
+        </operation>
+    </file>
+</modification>
