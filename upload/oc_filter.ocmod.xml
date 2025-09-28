@@ -2,7 +2,7 @@
 <modification>
     <name>Product Filter Extension</name>
     <code>oc_filter</code>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <author>OpenCart Filter</author>
     <link>https://github.com/</link>
     
@@ -11,23 +11,35 @@
         <operation>
             <search><![CDATA[$data['products'] = array();]]></search>
             <add position="before"><![CDATA[
-            // Apply filters
+            // Apply filters if module is enabled
             $filter_data = array();
             
-            if (isset($this->request->get['price_min'])) {
-                $filter_data['filter_price_min'] = $this->request->get['price_min'];
-            }
-            
-            if (isset($this->request->get['price_max'])) {
-                $filter_data['filter_price_max'] = $this->request->get['price_max'];
-            }
-            
-            if (isset($this->request->get['brands'])) {
-                $filter_data['filter_manufacturer_id'] = explode(',', $this->request->get['brands']);
-            }
-            
-            if (isset($this->request->get['metakeywords'])) {
-                $filter_data['filter_metakeywords'] = explode(',', $this->request->get['metakeywords']);
+            if ($this->config->get('module_oc_filter_status')) {
+                if ($this->config->get('module_oc_filter_price')) {
+                    if (isset($this->request->get['price_min'])) {
+                        $filter_data['filter_price_min'] = $this->request->get['price_min'];
+                    }
+                    if (isset($this->request->get['price_max'])) {
+                        $filter_data['filter_price_max'] = $this->request->get['price_max'];
+                    }
+                }
+                
+                if ($this->config->get('module_oc_filter_brand') && isset($this->request->get['brands'])) {
+                    $filter_data['filter_manufacturer_id'] = explode(',', $this->request->get['brands']);
+                }
+                
+                if ($this->config->get('module_oc_filter_attributes')) {
+                    foreach ($this->request->get as $key => $value) {
+                        if (strpos($key, 'attr_') === 0 && $value) {
+                            $attr_id = str_replace('attr_', '', $key);
+                            $filter_data['filter_attributes'][$attr_id] = explode(',', $value);
+                        }
+                    }
+                }
+                
+                if ($this->config->get('module_oc_filter_metakeywords') && isset($this->request->get['metakeywords'])) {
+                    $filter_data['filter_metakeywords'] = explode(',', $this->request->get['metakeywords']);
+                }
             }
             ]]></add>
         </operation>
@@ -39,6 +51,7 @@
                 'filter_price_min' => isset($filter_data['filter_price_min']) ? $filter_data['filter_price_min'] : null,
                 'filter_price_max' => isset($filter_data['filter_price_max']) ? $filter_data['filter_price_max'] : null,
                 'filter_manufacturer_id' => isset($filter_data['filter_manufacturer_id']) ? $filter_data['filter_manufacturer_id'] : null,
+                'filter_attributes' => isset($filter_data['filter_attributes']) ? $filter_data['filter_attributes'] : null,
                 'filter_metakeywords' => isset($filter_data['filter_metakeywords']) ? $filter_data['filter_metakeywords'] : null]]></add>
         </operation>
     </file>
@@ -65,6 +78,12 @@
         
         if (!empty($data['filter_manufacturer_id'])) {
             $sql .= " AND p.manufacturer_id IN (" . implode(',', array_map('intval', $data['filter_manufacturer_id'])) . ")";
+        }
+        
+        if (!empty($data['filter_attributes'])) {
+            foreach ($data['filter_attributes'] as $attribute_id => $attribute_values) {
+                $sql .= " AND p.product_id IN (SELECT pa.product_id FROM " . DB_PREFIX . "product_attribute pa WHERE pa.attribute_id = '" . (int)$attribute_id . "' AND pa.text IN ('" . implode("','", array_map(array($this->db, 'escape'), $attribute_values)) . "'))";
+            }
         }
         
         if (!empty($data['filter_metakeywords'])) {
