@@ -44,6 +44,16 @@ class ControllerExtensionModuleOcFilter extends Controller {
         $this->response->setOutput($this->load->view('extension/module/oc_filter', $data));
     }
 
+    public function install() {
+        $this->load->model('extension/module/oc_filter');
+        $this->model_extension_module_oc_filter->install();
+    }
+
+    public function uninstall() {
+        $this->load->model('extension/module/oc_filter');
+        $this->model_extension_module_oc_filter->uninstall();
+    }
+
     protected function validate() {
         if (!$this->user->hasPermission('modify', 'extension/module/oc_filter')) {
             $this->error['warning'] = $this->language->get('error_permission');

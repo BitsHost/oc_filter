@@ -92,4 +92,68 @@
         }]]></add>
         </operation>
     </file>
+    
+    <!-- Add module to admin extensions list -->
+    <file path="admin/model/setting/extension.php">
+        <operation>
+            <search><![CDATA[public function getInstalled($type) {]]></search>
+            <add position="after"><![CDATA[
+        // Auto-register oc_filter module
+        if ($type == 'module') {
+            $query = $this->db->query("SELECT * FROM " . DB_PREFIX . "extension WHERE `type` = 'module' AND `code` = 'oc_filter'");
+            if (!$query->num_rows) {
+                $this->db->query("INSERT INTO " . DB_PREFIX . "extension SET `type` = 'module', `code` = 'oc_filter'");
+            }
+        }]]></add>
+        </operation>
+    </file>
+    
+    <!-- Add permission for oc_filter module -->
+    <file path="admin/model/user/user_group.php">
+        <operation>
+            <search><![CDATA[public function addUserGroup($data) {]]></search>
+            <add position="after"><![CDATA[
+        // Auto-add oc_filter permissions for admin group
+        if (isset($data['user_group_id']) && $data['user_group_id'] == 1) {
+            $data['permission']['access'][] = 'extension/module/oc_filter';
+            $data['permission']['modify'][] = 'extension/module/oc_filter';
+        }]]></add>
+        </operation>
+    </file>
+    
+    <!-- Add filter module to category sidebar -->
+    <file path="catalog/controller/product/category.php">
+        <operation>
+            <search><![CDATA[$data['column_left'] = $this->load->controller('common/column_left');]]></search>
+            <add position="before"><![CDATA[
+        // Load filter module if enabled
+        if ($this->config->get('module_oc_filter_status')) {
+            $data['oc_filter'] = $this->load->controller('extension/module/oc_filter');
+        }
+        ]]></add>
+        </operation>
+    </file>
+    
+    <!-- Add filter to category template -->
+    <file path="catalog/view/theme/*/template/product/category.twig">
+        <operation>
+            <search><![CDATA[<div id="content" class="{{ class }}">{{ content_top }}]]></search>
+            <add position="after"><![CDATA[
+    {% if oc_filter %}
+    <div class="row">
+        <div class="col-sm-3">
+            {{ oc_filter }}
+        </div>
+        <div class="col-sm-9">
+    {% endif %}]]></add>
+        </operation>
+        <operation>
+            <search><![CDATA[{{ content_bottom }}</div>]]></search>
+            <add position="before"><![CDATA[
+    {% if oc_filter %}
+        </div>
+    </div>
+    {% endif %}]]></add>
+        </operation>
+    </file>
 </modification>
