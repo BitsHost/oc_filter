@@ -1,27 +1,42 @@
 # Installation Guide
 
-## Method 1: Manual Installation
+**Important**: This extension does NOT modify any core OpenCart files. It uses OCMOD to safely integrate filtering functionality without touching core code.
 
-1. Upload all files to your OpenCart root directory
-2. Go to Extensions > Modifications and click "Refresh"
-3. Go to Extensions > Extensions > Modules
-4. Find "Product Filter" and click Install
-5. Click Edit to configure and enable the module
+## Installation Steps
 
-## Method 2: OCMOD Installation
+1. Upload all extension files to your OpenCart root directory:
+   - `admin/` folder contents
+   - `catalog/` folder contents
 
-1. Create a ZIP file containing the upload folder contents
-2. Go to Extensions > Installer
-3. Upload the ZIP file
-4. Go to Extensions > Modifications and click "Refresh"
-5. Go to Extensions > Extensions > Modules
-6. Find "Product Filter" and install
+2. Install the OCMOD modification:
+   - Upload `upload/oc_filter.ocmod.xml` via Extensions > Installer
+   - OR manually copy to `system/` folder
 
-## Usage
+3. Apply modifications:
+   - Go to Extensions > Modifications
+   - Click "Refresh" to apply OCMOD changes
 
-Add the filter module to your category layout:
-1. Go to Design > Layouts
-2. Edit the Category layout
-3. Add the Product Filter module to the Column Left or Column Right position
+4. Install the module:
+   - Go to Extensions > Extensions > Modules
+   - Find "Product Filter" and click Install
+   - Click Edit to configure filter options
 
-The filter will automatically appear on category pages with price, brand, and attribute filtering options.
+## Why OCMOD is Required
+
+The OCMOD file safely modifies core functionality without changing core files:
+- Integrates filter parameters into category controller
+- Adds filtering logic to product model queries
+- Displays filter module in category templates
+
+## Configuration
+
+1. Enable the module and configure filter types
+2. The filter automatically appears on category pages
+3. No layout configuration needed - OCMOD handles integration
+
+## Core Files Integrity
+
+This extension maintains OpenCart's core file integrity by using:
+- Standard extension file structure
+- OCMOD for safe core integration
+- No direct core file modifications
