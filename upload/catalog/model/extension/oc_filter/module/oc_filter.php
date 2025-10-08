@@ -1,8 +1,5 @@
 <?php
-namespace Opencart\Catalog\Model\Extension\OcFilter\Module;
-use Opencart\System\Engine\Model;
-
-class OcFilter extends Model {
+class ModelExtensionModuleOcFilter extends Model {
     public function getPriceRange($category_id = 0) {
         $sql = "SELECT MIN(p.price) as min, MAX(p.price) as max FROM " . DB_PREFIX . "product p";
         

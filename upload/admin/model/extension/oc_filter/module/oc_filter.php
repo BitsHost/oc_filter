@@ -1,8 +1,5 @@
 <?php
-namespace Opencart\Admin\Model\Extension\OcFilter\Module;
-use Opencart\System\Engine\Model;
-
-class OcFilter extends Model {
+class ModelExtensionModuleOcFilter extends Model {
     public function install() {
         $this->db->query("
             CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "oc_filter_cache` (

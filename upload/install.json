@@ -1,0 +1,8 @@
+{
+    "name": "Product Filter Extension",
+    "version": "1.1.0",
+    "author": "OpenCart Filter",
+    "link": "https://github.com/",
+    "compatibility": "4.0.0.0+",
+    "type": "extension"
+}

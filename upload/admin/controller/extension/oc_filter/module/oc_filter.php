@@ -1,37 +1,34 @@
 <?php
-namespace Opencart\Admin\Controller\Extension\OcFilter\Module;
-use Opencart\System\Engine\Controller;
-
-class OcFilter extends Controller {
+class ControllerExtensionModuleOcFilter extends Controller {
     private $error = array();
 
     public function index() {
-        $this->load->language('extension/module/oc_filter');
+        $this->load->language('extension/oc_filter/module/oc_filter');
         $this->document->setTitle($this->language->get('heading_title'));
         $this->load->model('setting/setting');
 
         if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
             $this->model_setting_setting->editSetting('module_oc_filter', $this->request->post);
             $this->session->data['success'] = $this->language->get('text_success');
-            $this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module'));
+            $this->response->redirect($this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true));
         }
 
         $data['breadcrumbs'] = array();
         $data['breadcrumbs'][] = array(
             'text' => $this->language->get('text_home'),
-            'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'])
+            'href' => $this->url->link('common/dashboard', 'user_token=' . $this->session->data['user_token'], true)
         );
         $data['breadcrumbs'][] = array(
             'text' => $this->language->get('text_extension'),
-            'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module')
+            'href' => $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true)
         );
         $data['breadcrumbs'][] = array(
             'text' => $this->language->get('heading_title'),
-            'href' => $this->url->link('extension/oc_filter/module/oc_filter', 'user_token=' . $this->session->data['user_token'])
+            'href' => $this->url->link('extension/module/oc_filter', 'user_token=' . $this->session->data['user_token'], true)
         );
 
-        $data['action'] = $this->url->link('extension/oc_filter/module/oc_filter', 'user_token=' . $this->session->data['user_token']);
-        $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module');
+        $data['action'] = $this->url->link('extension/module/oc_filter', 'user_token=' . $this->session->data['user_token'], true);
+        $data['cancel'] = $this->url->link('marketplace/extension', 'user_token=' . $this->session->data['user_token'] . '&type=module', true);
 
         $data['module_oc_filter_status'] = isset($this->request->post['module_oc_filter_status']) ? $this->request->post['module_oc_filter_status'] : $this->config->get('module_oc_filter_status');
         $data['module_oc_filter_price'] = isset($this->request->post['module_oc_filter_price']) ? $this->request->post['module_oc_filter_price'] : $this->config->get('module_oc_filter_price');
@@ -44,21 +41,21 @@ class OcFilter extends Controller {
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
 
-        $this->response->setOutput($this->load->view('extension/module/oc_filter', $data));
+        $this->response->setOutput($this->load->view('extension/oc_filter/module/oc_filter', $data));
     }
 
     public function install() {
-        $this->load->model('extension/oc_filter/module/oc_filter');
-        $this->model_extension_oc_filter_module_oc_filter->install();
+        $this->load->model('extension/module/oc_filter');
+        $this->model_extension_module_oc_filter->install();
     }
 
     public function uninstall() {
-        $this->load->model('extension/oc_filter/module/oc_filter');
-        $this->model_extension_oc_filter_module_oc_filter->uninstall();
+        $this->load->model('extension/module/oc_filter');
+        $this->model_extension_module_oc_filter->uninstall();
     }
 
     protected function validate() {
-        if (!$this->user->hasPermission('modify', 'extension/oc_filter/module/oc_filter')) {
+        if (!$this->user->hasPermission('modify', 'extension/module/oc_filter')) {
             $this->error['warning'] = $this->language->get('error_permission');
         }
         return !$this->error;

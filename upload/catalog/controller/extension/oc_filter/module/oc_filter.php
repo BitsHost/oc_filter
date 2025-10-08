@@ -1,11 +1,8 @@
 <?php
-namespace Opencart\Catalog\Controller\Extension\OcFilter\Module;
-use Opencart\System\Engine\Controller;
-
-class OcFilter extends Controller {
+class ControllerExtensionModuleOcFilter extends Controller {
     public function index() {
-        $this->load->language('extension/module/oc_filter');
-        $this->load->model('extension/oc_filter/module/oc_filter');
+        $this->load->language('extension/oc_filter/module/oc_filter');
+        $this->load->model('extension/module/oc_filter');
         $this->load->model('catalog/category');
         $this->load->model('catalog/product');
 
@@ -20,7 +17,7 @@ class OcFilter extends Controller {
 
         // Price filter
         if ($this->config->get('module_oc_filter_price')) {
-            $price_range = $this->model_extension_oc_filter_module_oc_filter->getPriceRange($category_id);
+            $price_range = $this->model_extension_module_oc_filter->getPriceRange($category_id);
             $data['price_min'] = $price_range['min'];
             $data['price_max'] = $price_range['max'];
             $data['filter_price_min'] = isset($this->request->get['price_min']) ? $this->request->get['price_min'] : $price_range['min'];
@@ -32,7 +29,7 @@ class OcFilter extends Controller {
 
         // Brand filter
         if ($this->config->get('module_oc_filter_brand')) {
-            $data['brands'] = $this->model_extension_oc_filter_module_oc_filter->getBrands($category_id);
+            $data['brands'] = $this->model_extension_module_oc_filter->getBrands($category_id);
             $data['filter_brands'] = isset($this->request->get['brands']) ? explode(',', $this->request->get['brands']) : array();
             $data['show_brand_filter'] = true;
         } else {
@@ -41,7 +38,7 @@ class OcFilter extends Controller {
 
         // Attribute filters
         if ($this->config->get('module_oc_filter_attributes')) {
-            $data['attributes'] = $this->model_extension_oc_filter_module_oc_filter->getAttributes($category_id);
+            $data['attributes'] = $this->model_extension_module_oc_filter->getAttributes($category_id);
             $data['filter_attributes'] = isset($this->request->get['attributes']) ? $this->request->get['attributes'] : array();
             $data['show_attribute_filter'] = true;
         } else {
@@ -51,13 +48,13 @@ class OcFilter extends Controller {
         // Metakeywords filter
         if ($this->config->get('module_oc_filter_metakeywords')) {
             $max_keywords = (int)$this->config->get('module_oc_filter_max_keywords') ?: 20;
-            $data['metakeywords'] = array_slice($this->model_extension_oc_filter_module_oc_filter->getMetakeywords($category_id), 0, $max_keywords);
+            $data['metakeywords'] = array_slice($this->model_extension_module_oc_filter->getMetakeywords($category_id), 0, $max_keywords);
             $data['filter_metakeywords'] = isset($this->request->get['metakeywords']) ? explode(',', $this->request->get['metakeywords']) : array();
             $data['show_metakeywords_filter'] = true;
         } else {
             $data['show_metakeywords_filter'] = false;
         }
 
-        return $this->load->view('extension/module/oc_filter', $data);
+        return $this->load->view('extension/oc_filter/module/oc_filter', $data);
     }
 }

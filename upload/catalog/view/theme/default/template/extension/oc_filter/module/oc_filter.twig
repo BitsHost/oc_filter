@@ -1,0 +1,105 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">{{ heading_title }}</h4>
+  </div>
+  <div class="panel-body">
+    <form id="filter-form">
+      <!-- Price Filter -->
+      {% if show_price_filter %}
+      <div class="form-group">
+        <label>{{ text_price }}</label>
+        <div class="row">
+          <div class="col-sm-6">
+            <input type="number" name="price_min" value="{{ filter_price_min }}" min="{{ price_min }}" max="{{ price_max }}" class="form-control" placeholder="Min">
+          </div>
+          <div class="col-sm-6">
+            <input type="number" name="price_max" value="{{ filter_price_max }}" min="{{ price_min }}" max="{{ price_max }}" class="form-control" placeholder="Max">
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Brand Filter -->
+      {% if show_brand_filter and brands %}
+      <div class="form-group">
+        <label>{{ text_brand }}</label>
+        {% for brand in brands %}
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="brands[]" value="{{ brand.manufacturer_id }}" {% if brand.manufacturer_id in filter_brands %}checked{% endif %}> {{ brand.name }}
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Attribute Filters -->
+      {% if show_attribute_filter %}
+      {% for attribute in attributes %}
+      <div class="form-group">
+        <label>{{ attribute.name }}</label>
+        {% for value in attribute.values %}
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="attributes[{{ attribute.attribute_id }}][]" value="{{ value }}" {% if filter_attributes[attribute.attribute_id] and value in filter_attributes[attribute.attribute_id] %}checked{% endif %}> {{ value }}
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+      {% endif %}
+
+      <!-- Metakeywords Filter -->
+      {% if show_metakeywords_filter and metakeywords %}
+      <div class="form-group">
+        <label>{{ text_metakeywords }}</label>
+        {% for keyword in metakeywords %}
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="metakeywords[]" value="{{ keyword }}" {% if keyword in filter_metakeywords %}checked{% endif %}> {{ keyword }}
+          </label>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <button type="button" class="btn btn-primary" onclick="applyFilter()">{{ text_filter }}</button>
+      <button type="button" class="btn btn-default" onclick="clearFilter()">{{ text_clear }}</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function applyFilter() {
+    var form = document.getElementById('filter-form');
+    var formData = new FormData(form);
+    var params = new URLSearchParams();
+    
+    for (var pair of formData.entries()) {
+        if (pair[1]) {
+            if (pair[0].includes('brands')) {
+                var brands = params.get('brands') || '';
+                params.set('brands', brands ? brands + ',' + pair[1] : pair[1]);
+            } else if (pair[0].includes('metakeywords')) {
+                var keywords = params.get('metakeywords') || '';
+                params.set('metakeywords', keywords ? keywords + ',' + pair[1] : pair[1]);
+            } else if (pair[0].includes('attributes')) {
+                var match = pair[0].match(/attributes\[(\d+)\]/);
+                if (match) {
+                    var attrId = match[1];
+                    var attrValues = params.get('attr_' + attrId) || '';
+                    params.set('attr_' + attrId, attrValues ? attrValues + ',' + pair[1] : pair[1]);
+                }
+            } else {
+                params.set(pair[0], pair[1]);
+            }
+        }
+    }
+    
+    window.location.search = params.toString();
+}
+
+function clearFilter() {
+    window.location.href = window.location.pathname;
+}
+</script>
